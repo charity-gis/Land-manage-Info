@@ -1,0 +1,642 @@
+<title>LandTrust Build Route</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    --paper:#eef0ea;
+    --paper-raised:#e2e6db;
+    --paper-line:#c9cfc0;
+    --ink:#141a15;
+    --ink-soft:#4b5449;
+    --ink-faint:#7a8272;
+    --accent:#2f5d50;
+    --accent-soft:#dce6df;
+    --accent-2:#3a5a78;
+    --accent-2-soft:#dee6ec;
+    --brass:#8a5f24;
+    --st-verified:#2f7a4f;   --st-verified-bg:#e1efe4;
+    --st-pending:#93690f;    --st-pending-bg:#f3e9d2;
+    --st-disputed:#a8402c;   --st-disputed-bg:#f4e0da;
+    --st-hold:#565f52;       --st-hold-bg:#e4e6df;
+    --code-bg:#e4e8dd;
+    --shadow:0 1px 2px rgba(20,26,21,0.07), 0 6px 18px rgba(20,26,21,0.06);
+    --font-serif:'IBM Plex Serif', Georgia, 'Times New Roman', serif;
+    --font-sans:'IBM Plex Sans', -apple-system, 'Segoe UI', sans-serif;
+    --font-mono:'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#10141a;
+      --paper-raised:#171c22;
+      --paper-line:#2b333a;
+      --ink:#e7ece6;
+      --ink-soft:#aab3a4;
+      --ink-faint:#77816f;
+      --accent:#5fa08c;
+      --accent-soft:#16241f;
+      --accent-2:#8ab2d4;
+      --accent-2-soft:#182530;
+      --brass:#d1a052;
+      --st-verified:#5fbb8b; --st-verified-bg:#12251b;
+      --st-pending:#d9ac4b;  --st-pending-bg:#2a2211;
+      --st-disputed:#e28873; --st-disputed-bg:#2c1613;
+      --st-hold:#9aa398;     --st-hold-bg:#1c2320;
+      --code-bg:#1a2027;
+      --shadow:0 1px 2px rgba(0,0,0,0.4), 0 8px 22px rgba(0,0,0,0.32);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#10141a;
+    --paper-raised:#171c22;
+    --paper-line:#2b333a;
+    --ink:#e7ece6;
+    --ink-soft:#aab3a4;
+    --ink-faint:#77816f;
+    --accent:#5fa08c;
+    --accent-soft:#16241f;
+    --accent-2:#8ab2d4;
+    --accent-2-soft:#182530;
+    --brass:#d1a052;
+    --st-verified:#5fbb8b; --st-verified-bg:#12251b;
+    --st-pending:#d9ac4b;  --st-pending-bg:#2a2211;
+    --st-disputed:#e28873; --st-disputed-bg:#2c1613;
+    --st-hold:#9aa398;     --st-hold-bg:#1c2320;
+    --code-bg:#1a2027;
+    --shadow:0 1px 2px rgba(0,0,0,0.4), 0 8px 22px rgba(0,0,0,0.32);
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  @media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } }
+
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--font-sans);
+    font-size:16px;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  h1,h2,h3,h4{ font-family:var(--font-serif); font-weight:600; text-wrap:balance; color:var(--ink); margin:0; }
+  p{ margin:0 0 1rem; color:var(--ink-soft); }
+  p:last-child{ margin-bottom:0; }
+  a{ color:var(--accent-2); text-underline-offset:3px; }
+  a:focus-visible, button:focus-visible, summary:focus-visible{ outline:2px solid var(--accent-2); outline-offset:2px; border-radius:2px; }
+  code, .mono{ font-family:var(--font-mono); }
+  code{ background:var(--code-bg); padding:0.1em 0.4em; border-radius:3px; font-size:0.88em; color:var(--ink); }
+
+  .prose{ max-width:66ch; }
+  .prose p, .prose li{ max-width:66ch; }
+  .prose li{ margin-bottom:0.4rem; }
+
+  section{ scroll-margin-top:5.5rem; }
+
+  /* ---------- masthead ---------- */
+  .masthead{
+    border-bottom:1px solid var(--paper-line);
+    padding:2.75rem 1.5rem 2.25rem;
+    background:
+      linear-gradient(var(--paper), var(--paper)) padding-box,
+      repeating-linear-gradient(90deg, var(--paper-line) 0 1px, transparent 1px 96px) border-box;
+    background-position: 0 0, 0 0;
+  }
+  .masthead-inner{ max-width:1100px; margin:0 auto; }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:0.5em;
+    font-family:var(--font-mono); font-size:0.72rem; letter-spacing:0.09em; text-transform:uppercase;
+    color:var(--brass); margin-bottom:0.9rem;
+  }
+  .eyebrow::before{ content:"§"; opacity:0.7; }
+  .masthead h1{ font-size:clamp(1.9rem, 1.5rem + 1.6vw, 2.6rem); margin-bottom:0.6rem; }
+  .masthead .sub{ font-size:1.05rem; color:var(--ink-soft); max-width:62ch; margin-bottom:1.4rem; }
+  .meta-row{ display:flex; flex-wrap:wrap; gap:0.5rem; }
+  .chip{
+    font-family:var(--font-mono); font-size:0.76rem; padding:0.35em 0.7em;
+    border:1px solid var(--paper-line); border-radius:3px; color:var(--ink-soft); background:var(--paper-raised);
+    display:inline-flex; align-items:center; gap:0.4em;
+  }
+  .chip strong{ color:var(--ink); font-weight:600; }
+  .chip.swap{ color:var(--accent); border-color:color-mix(in srgb, var(--accent) 35%, var(--paper-line)); }
+
+  /* ---------- layout ---------- */
+  .layout{ max-width:1100px; margin:0 auto; padding:2.75rem 1.5rem 6rem; display:grid; grid-template-columns:200px minmax(0,1fr); gap:3rem; align-items:start; }
+  .railnav{ position:sticky; top:1.5rem; }
+  .railnav ol{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0.15rem; border-left:1px solid var(--paper-line); }
+  .railnav a{
+    display:flex; gap:0.6em; text-decoration:none; color:var(--ink-faint);
+    font-size:0.86rem; padding:0.4em 0 0.4em 0.9em; margin-left:-1px; border-left:2px solid transparent;
+  }
+  .railnav a:hover{ color:var(--ink); }
+  .railnav a.active{ color:var(--accent); border-left-color:var(--accent); font-weight:600; }
+  .railnav .num{ font-family:var(--font-mono); font-size:0.78em; color:var(--ink-faint); min-width:1.4em; }
+
+  main{ display:flex; flex-direction:column; gap:4.5rem; min-width:0; }
+
+  .section-head{ display:flex; align-items:baseline; gap:0.7rem; margin-bottom:1.4rem; }
+  .section-head .clause{ font-family:var(--font-mono); color:var(--brass); font-size:1rem; }
+  .section-head h2{ font-size:1.5rem; }
+
+  .callout{
+    background:var(--accent-soft); border:1px solid color-mix(in srgb, var(--accent) 28%, var(--paper-line));
+    border-radius:4px; padding:1.1rem 1.3rem; margin:1.2rem 0;
+  }
+  .callout p{ color:var(--ink); margin-bottom:0; }
+  .callout .label{ font-family:var(--font-mono); font-size:0.72rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--accent); display:block; margin-bottom:0.45rem; }
+
+  /* ---------- glossary ---------- */
+  .glossary-group{ margin-bottom:2rem; }
+  .glossary-group h3{ font-size:0.78rem; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-faint); margin-bottom:0.9rem; }
+  .term-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(260px,1fr)); gap:0.85rem; }
+  .term-card{ background:var(--paper-raised); border:1px solid var(--paper-line); border-radius:4px; padding:1rem 1.1rem; }
+  .term-card dt{ font-family:var(--font-serif); font-weight:600; font-size:1rem; margin-bottom:0.35rem; color:var(--ink); }
+  .term-card dd{ margin:0; font-size:0.92rem; color:var(--ink-soft); }
+  .term-card dd code{ font-size:0.85em; }
+
+  .severity{ display:flex; flex-wrap:wrap; align-items:center; gap:0.5rem; margin-top:0.9rem; }
+  .sev{
+    font-family:var(--font-mono); font-size:0.76rem; padding:0.35em 0.65em; border-radius:3px; white-space:nowrap;
+    border:1px solid transparent;
+  }
+  .sev1{ background:var(--accent-soft); color:var(--accent); border-color:color-mix(in srgb, var(--accent) 30%, transparent); }
+  .sev2{ background:var(--st-pending-bg); color:var(--st-pending); }
+  .sev3{ background:var(--st-pending-bg); color:var(--brass); }
+  .sev4{ background:var(--st-disputed-bg); color:var(--st-disputed); font-weight:600; }
+  .sev-arrow{ color:var(--ink-faint); font-size:0.8rem; }
+
+  /* ---------- principle cards ---------- */
+  .principles{ display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:1rem; margin-top:1rem; }
+  .principle{ border:1px solid var(--paper-line); border-radius:4px; padding:1.3rem 1.4rem; background:var(--paper-raised); }
+  .principle .tag{ font-family:var(--font-mono); font-size:0.72rem; color:var(--brass); text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:0.5rem; }
+  .principle h3{ font-size:1.08rem; margin-bottom:0.5rem; }
+  .principle p{ font-size:0.93rem; }
+
+  /* ---------- stack table ---------- */
+  .table-scroll{ overflow-x:auto; border:1px solid var(--paper-line); border-radius:4px; }
+  table.stack{ border-collapse:collapse; width:100%; min-width:760px; font-size:0.88rem; }
+  table.stack th, table.stack td{ text-align:left; padding:0.75rem 1rem; border-bottom:1px solid var(--paper-line); vertical-align:top; }
+  table.stack thead th{ font-family:var(--font-mono); font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-faint); background:var(--paper-raised); }
+  table.stack tbody tr:last-child td{ border-bottom:none; }
+  table.stack td.layer{ font-weight:600; color:var(--ink); white-space:nowrap; }
+  table.stack td.old{ color:var(--ink-faint); }
+  table.stack td.js{ color:var(--accent); font-weight:600; }
+  table.stack td.why{ color:var(--ink-soft); max-width:34ch; }
+
+  /* ---------- stepper ---------- */
+  .stepper{ display:flex; gap:0.5rem; overflow-x:auto; padding-bottom:0.4rem; margin-bottom:2.2rem; }
+  .stepper a{
+    flex:0 0 auto; display:flex; flex-direction:column; gap:0.15rem; text-decoration:none;
+    padding:0.5em 0.85em; border:1px solid var(--paper-line); border-radius:4px; background:var(--paper-raised);
+  }
+  .stepper a .n{ font-family:var(--font-mono); font-size:0.7rem; color:var(--brass); }
+  .stepper a .t{ font-size:0.78rem; color:var(--ink); white-space:nowrap; }
+
+  /* ---------- step cards ---------- */
+  .step{ border:1px solid var(--paper-line); border-radius:5px; padding:1.6rem 1.7rem; margin-bottom:1.2rem; background:var(--paper-raised); }
+  .step-head{ display:flex; align-items:baseline; gap:0.8rem; margin-bottom:0.8rem; flex-wrap:wrap; }
+  .step-num{ font-family:var(--font-mono); font-size:1.5rem; color:var(--brass); line-height:1; }
+  .step-head h3{ font-size:1.2rem; }
+  .step .plain{ font-style:normal; }
+  .step .field-label{ font-family:var(--font-mono); font-size:0.7rem; text-transform:uppercase; letter-spacing:0.07em; color:var(--ink-faint); display:block; margin:1.1rem 0 0.4rem; }
+  .step .field-label:first-of-type{ margin-top:1.1rem; }
+  .pill-row{ display:flex; flex-wrap:wrap; gap:0.4rem; }
+  .pill{ font-family:var(--font-mono); font-size:0.78rem; background:var(--code-bg); color:var(--ink); padding:0.28em 0.6em; border-radius:3px; }
+  .exit-gate{ background:var(--accent-soft); border-left:3px solid var(--accent); border-radius:0 4px 4px 0; padding:0.85rem 1rem; margin-top:1.1rem; }
+  .exit-gate p{ color:var(--ink); font-size:0.92rem; margin:0; }
+  .exit-gate .label{ font-family:var(--font-mono); font-size:0.7rem; text-transform:uppercase; letter-spacing:0.07em; color:var(--accent); display:block; margin-bottom:0.3rem; }
+
+  /* ---------- badges (parcel status) ---------- */
+  .badge{ display:inline-flex; align-items:center; gap:0.4em; font-family:var(--font-mono); font-size:0.76rem; padding:0.3em 0.65em; border-radius:3px; border-left:3px solid; }
+  .badge--verified{ background:var(--st-verified-bg); color:var(--st-verified); border-color:var(--st-verified); }
+  .badge--pending{ background:var(--st-pending-bg); color:var(--st-pending); border-color:var(--st-pending); }
+  .badge--disputed{ background:var(--st-disputed-bg); color:var(--st-disputed); border-color:var(--st-disputed); }
+  .badge--hold{ background:var(--st-hold-bg); color:var(--st-hold); border-color:var(--st-hold); }
+  .badge-row{ display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.9rem; }
+
+  /* ---------- lists ---------- */
+  ul.plain, ol.plain{ padding-left:1.3rem; }
+  ul.plain li, ol.plain li{ color:var(--ink-soft); margin-bottom:0.55rem; }
+  ul.plain li::marker{ color:var(--brass); }
+
+  .not-yet{ display:grid; gap:0.9rem; }
+  .not-yet .item{ display:grid; grid-template-columns:auto 1fr; gap:0.9rem; border:1px solid var(--paper-line); background:var(--paper-raised); border-radius:4px; padding:0.95rem 1.1rem; align-items:start; }
+  .not-yet .item .x{ font-family:var(--font-mono); color:var(--st-disputed); font-size:1rem; }
+  .not-yet .item h4{ font-size:0.98rem; margin-bottom:0.25rem; }
+  .not-yet .item p{ font-size:0.9rem; margin-bottom:0; }
+
+  .next-box{ border:1px solid color-mix(in srgb, var(--brass) 40%, var(--paper-line)); background:var(--paper-raised); border-radius:5px; padding:1.6rem 1.8rem; }
+  .next-box h3{ font-size:1.15rem; margin-bottom:0.5rem; }
+
+  footer.doc-footer{ border-top:1px solid var(--paper-line); padding-top:1.5rem; font-size:0.85rem; color:var(--ink-faint); }
+
+  /* ---------- responsive ---------- */
+  @media (max-width:880px){
+    .layout{ grid-template-columns:1fr; padding-top:1.5rem; }
+    .railnav{ position:sticky; top:0; z-index:5; background:var(--paper); padding:0.7rem 0; border-bottom:1px solid var(--paper-line); margin:0 -1.5rem; padding-left:1.5rem; padding-right:1.5rem; }
+    .railnav ol{ flex-direction:row; overflow-x:auto; border-left:none; gap:0.3rem; }
+    .railnav a{ border-left:none; border-bottom:2px solid transparent; padding:0.3em 0.6em; white-space:nowrap; }
+    .railnav a.active{ border-left:none; border-bottom-color:var(--accent); }
+  }
+</style>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <span class="eyebrow">Companion build route · engineering-facing</span>
+    <h1>LandTrust Build Route — Node.js / React / Next.js Edition</h1>
+    <p class="sub">A step-by-step plan for what actually gets built, in what order, for the LandTrust land-parcel registry — rewritten for a JavaScript/TypeScript stack instead of the PRD's original Python + GeoDjango recommendation, and written so a teammate who has never touched GIS can follow every step.</p>
+    <div class="meta-row">
+      <span class="chip">Source: <strong>LandTrust Registry PRD v1.0</strong>, §11–13 &amp; "Build Route from Zero"</span>
+      <span class="chip swap"><strong>Python + GeoDjango</strong> → <strong>Node.js + React + Next.js</strong></span>
+      <span class="chip">Every GIS/legal term defined on first use</span>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="railnav" aria-label="Sections on this page">
+    <ol>
+      <li><a href="#intro"><span class="num">00</span>Why this doc exists</a></li>
+      <li><a href="#glossary"><span class="num">01</span>Plain-English glossary</a></li>
+      <li><a href="#foundation"><span class="num">02</span>What can't change</a></li>
+      <li><a href="#stack"><span class="num">03</span>The stack, translated</a></li>
+      <li><a href="#route"><span class="num">04</span>The build route</a></li>
+      <li><a href="#legal"><span class="num">05</span>The parallel legal track</a></li>
+      <li><a href="#not-yet"><span class="num">06</span>What not to build yet</a></li>
+      <li><a href="#next"><span class="num">07</span>Immediate next action</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <section id="intro">
+      <div class="section-head"><span class="clause">00</span><h2>Why this document exists</h2></div>
+      <div class="prose">
+        <p>The original PRD's build route recommended Python, Django and GeoDjango. The team has decided to build this instead on <strong>Node.js, React and Next.js</strong> — a single JavaScript/TypeScript language across the whole system, front to back. Almost none of what the PRD actually requires changes because of that decision: the database is the same, the legal workflow rules are the same, and the two architectural decisions that matter most (explained in §02) are the same. What changes is only <em>which tools implement</em> those requirements.</p>
+        <p>This document also assumes at least one person on the team has never worked with mapping/GIS software before. So every mapping term and every land-law term is defined in plain English the first time it matters, and there's a standalone glossary (§01) to come back to.</p>
+      </div>
+    </section>
+
+    <section id="glossary">
+      <div class="section-head"><span class="clause">01</span><h2>Plain-English glossary</h2></div>
+      <p class="prose">Skip this section if you already know it. Come back to it whenever a term below shows up later in the doc — it will always appear in <code>mono type</code> the first time it's used in a section.</p>
+
+      <div class="glossary-group">
+        <h3>Mapping &amp; data terms</h3>
+        <dl class="term-grid">
+          <div class="term-card"><dt>Parcel</dt><dd>A single, legally defined piece of land with its own boundary and ID. It's the core "record" the entire system revolves around — everything else (ownership, disputes, listings) hangs off a parcel.</dd></div>
+          <div class="term-card"><dt>Geometry / boundary</dt><dd>The actual outline of a parcel's shape, stored as a connected ring of coordinates (a <em>polygon</em>) — not just one pin dropped on a map.</dd></div>
+          <div class="term-card"><dt>CRS (Coordinate Reference System)</dt><dd>The "ruler" that turns a real spot on Earth into numbers a computer can store. Different surveys use different rulers — using the wrong one silently shifts every parcel to the wrong place on the map, with no error message.</dd></div>
+          <div class="term-card"><dt>Shapefile</dt><dd>The near-universal file format government survey offices hand over (a <code>.shp</code> file plus a few hidden companion files). It's raw material to import from, not a finished database.</dd></div>
+          <div class="term-card"><dt>PostGIS</dt><dd>An add-on for our PostgreSQL database that teaches it to understand and search <em>shapes</em>, not just numbers and text — so we can ask "which parcels overlap this one?" directly in the database.</dd></div>
+          <div class="term-card"><dt>Vector tiles / tile server</dt><dd>Pre-cut "map puzzle pieces" that a small dedicated program slices out of the database on request, so a browser showing 500,000 parcels only ever downloads the pieces currently on screen.</dd></div>
+          <div class="term-card"><dt>GeoJSON</dt><dd>A JSON-based (i.e. JavaScript-native) way of describing a shape. Used to move parcel boundaries between the browser and the server.</dd></div>
+          <div class="term-card"><dt>Topology / geometry validity</dt><dd>Whether a shape is "legal" as a shape: no self-crossing outlines, no missing corners — and critically, no two parcels claiming the same ground, which is often literal evidence of double-selling land.</dd></div>
+          <div class="term-card"><dt>Cadastre / cadastral</dt><dd>The official government register — map plus ownership — of land. "Cadastral survey" is the formal land-measuring process behind it.</dd></div>
+        </dl>
+      </div>
+
+      <div class="glossary-group">
+        <h3>Legal &amp; workflow terms</h3>
+        <dl class="term-grid">
+          <div class="term-card"><dt>Chain of title</dt><dd>The ownership history of a parcel, transfer by transfer, back to its origin.</dd></div>
+          <div class="term-card">
+            <dt>Encumbrance</dt>
+            <dd>Umbrella term for "something is legally blocking this parcel from being sold, leased or transferred." Severity increases left to right:
+              <div class="severity">
+                <span class="sev sev1">Charge / Mortgage</span><span class="sev-arrow">→</span>
+                <span class="sev sev2">Caution</span><span class="sev-arrow">→</span>
+                <span class="sev sev3">Restriction</span><span class="sev-arrow">→</span>
+                <span class="sev sev4">Inhibition</span>
+              </div>
+            </dd>
+          </div>
+          <div class="term-card"><dt>MoU (Memorandum of Understanding)</dt><dd>A signed, formal agreement with a government office. No technical integration work with their systems is allowed to start before this is signed.</dd></div>
+          <div class="term-card"><dt>Verification Officer / Senior Verifier</dt><dd>The platform's own trained staff who check ownership evidence before anything is published. A Senior Verifier is the required, independent second check on higher-risk cases.</dd></div>
+          <div class="term-card"><dt>Audit trail / hash chain</dt><dd>A permanent record of who changed what, and when — where each entry mathematically "locks in" the one before it, so tampering with old history becomes detectable.</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section id="foundation">
+      <div class="section-head"><span class="clause">02</span><h2>What can't change, no matter the stack</h2></div>
+      <p class="prose">Two decisions in the PRD are called out as things that "cannot be retrofitted" later. They have nothing to do with Python vs. JavaScript — they have to be right on day one regardless of language, so they come before any tooling discussion.</p>
+      <div class="principles">
+        <div class="principle">
+          <span class="tag">Principle A</span>
+          <h3>Multi-tenancy from day one</h3>
+          <p>Every parcel row carries a <code>region_id</code> (which city/county it belongs to) from the very first line of code — even though the pilot only ever uses one region. Adding this later means rewriting every table and every query in the system. Adding it now costs nothing, because there's only one region to worry about anyway.</p>
+        </div>
+        <div class="principle">
+          <span class="tag">Principle B</span>
+          <h3>The verification gate is a database rule, not a promise</h3>
+          <p>The database itself refuses to let a parcel's status become <span class="badge badge--verified">Verified</span> from anywhere except the one verification workflow, and refuses to let it be listed for sale unless it already is. A bug, a rushed deadline, or a dishonest developer could all bypass a rule that only lives in application code. They can't bypass a rule the database enforces on every single save.</p>
+        </div>
+      </div>
+      <div class="badge-row">
+        <span class="badge badge--pending">Pending Verification</span>
+        <span class="badge badge--verified">Verified</span>
+        <span class="badge badge--disputed">Disputed</span>
+        <span class="badge badge--hold">Under Legal Hold</span>
+      </div>
+      <p class="prose" style="margin-top:0.9rem; font-size:0.9rem;">Every parcel starts in <span class="badge badge--pending">Pending Verification</span> the moment it's imported. Nothing in the codebase — in any language — is allowed to move a parcel straight to <span class="badge badge--verified">Verified</span>.</p>
+    </section>
+
+    <section id="stack">
+      <div class="section-head"><span class="clause">03</span><h2>The stack, translated to JS</h2></div>
+      <p class="prose">Row by row: what the PRD originally suggested, what replaces it in a Node.js/React/Next.js build, and why the swap is safe (or what to watch for).</p>
+      <div class="table-scroll">
+        <table class="stack">
+          <thead>
+            <tr><th>Layer</th><th>PRD's original pick</th><th>JS equivalent</th><th>Why</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="layer">Database</td>
+              <td class="old">PostgreSQL + PostGIS</td>
+              <td class="js">Unchanged</td>
+              <td class="why">The database doesn't know or care what language talks to it. No swap needed here at all.</td>
+            </tr>
+            <tr>
+              <td class="layer">Backend framework</td>
+              <td class="old">Django (+ GeoDjango)</td>
+              <td class="js">Node.js + NestJS (TypeScript)</td>
+              <td class="why">NestJS gives the same "structure built in" feeling Django did — modules, permission guards, decorators. That structure is exactly why Django was picked for the admin console, RBAC and audit trail in the first place.</td>
+            </tr>
+            <tr>
+              <td class="layer">Talking to spatial data</td>
+              <td class="old">GeoDjango's geometry fields</td>
+              <td class="js">Prisma for normal fields, raw SQL for shapes</td>
+              <td class="why">Prisma is the most popular JS way to talk to a database, but it doesn't fully understand PostGIS shapes yet. ~95% of the app uses Prisma normally; anything asking "what shape is this / does it overlap that" drops to plain SQL.</td>
+            </tr>
+            <tr>
+              <td class="layer">"Nothing overwritten" versioning</td>
+              <td class="old">django-simple-history (plug-in)</td>
+              <td class="js">A hand-built version table</td>
+              <td class="why">Nothing in the JS ecosystem does this as cleanly as that plug-in did, so it has to be built deliberately either way — the PRD's own route already flagged this as hand-built work, not an install.</td>
+            </tr>
+            <tr>
+              <td class="layer">Verification workflow engine</td>
+              <td class="old">django-fsm</td>
+              <td class="js">XState</td>
+              <td class="why">A well-established TypeScript library for "a thing that can only be in one state at a time, and only move to specific next states" — exactly what a verification case is. Makes every rule explicit and testable.</td>
+            </tr>
+            <tr>
+              <td class="layer">Public map + web app</td>
+              <td class="old">React/Vue + TS + Mapbox/Leaflet</td>
+              <td class="js">React + Next.js + TS + MapLibre GL JS</td>
+              <td class="why">Barely changes — the PRD already recommended React. Next.js adds page routing, faster first loads, and a place for small backend endpoints if needed.</td>
+            </tr>
+            <tr>
+              <td class="layer">Field officer's mobile app <em>(later)</em></td>
+              <td class="old">React Native or Flutter</td>
+              <td class="js">React Native</td>
+              <td class="why">Keeps every layer of the system — web, backend, mobile — in one language, TypeScript. One less skill the team has to hold in its head.</td>
+            </tr>
+            <tr>
+              <td class="layer">Serving the map itself</td>
+              <td class="old">pg_tileserv or Martin</td>
+              <td class="js">Unchanged</td>
+              <td class="why">Small standalone programs that read straight from PostGIS. They don't run inside, or care about, the main application's language at all.</td>
+            </tr>
+            <tr>
+              <td class="layer">Staff login / MFA / SSO</td>
+              <td class="old">Keycloak / Auth0 / AWS Cognito</td>
+              <td class="js">Unchanged, plus NextAuth.js</td>
+              <td class="why">The staff identity provider is unchanged. NextAuth.js (Auth.js) is added purely to manage login sessions inside the Next.js app itself.</td>
+            </tr>
+            <tr>
+              <td class="layer">"One app, many modules"</td>
+              <td class="old">21 Django "apps" in one project</td>
+              <td class="js">21 NestJS modules in one API, in a monorepo with the Next.js frontend</td>
+              <td class="why">Same philosophy, different toolbox: keep the 21 service boundaries from the PRD's architecture section as folders/modules from day one, so splitting any one out later is a config change, not a rewrite.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout">
+        <span class="label">Monorepo, in one sentence</span>
+        <p>One repository holding an <code>apps/api</code> folder (NestJS, 21 modules) and an <code>apps/web</code> folder (Next.js) that talk to each other over a normal API — not 21 separately-deployed services, not yet. See §06 for why that restraint matters.</p>
+      </div>
+    </section>
+
+    <section id="route">
+      <div class="section-head"><span class="clause">04</span><h2>The build route</h2></div>
+      <p class="prose">Nine steps, each with a deliverable and an <strong>exit gate</strong> — the thing that has to be demonstrably true before moving to the next step. Steps 1–5 run in strict order and build almost nothing "product-shaped" on purpose: they exist to make sure the ground under the trust engine (Step 6) is solid. Steps 6–9 can partly run in parallel once that ground is proven.</p>
+
+      <div class="stepper" aria-hidden="false">
+        <a href="#step-1"><span class="n">01</span><span class="t">Know your data</span></a>
+        <a href="#step-2"><span class="n">02</span><span class="t">Canonical schema</span></a>
+        <a href="#step-3"><span class="n">03</span><span class="t">Ingestion pipeline</span></a>
+        <a href="#step-4"><span class="n">04</span><span class="t">Verify the load</span></a>
+        <a href="#step-5"><span class="n">05</span><span class="t">The map</span></a>
+        <a href="#step-6"><span class="n">06</span><span class="t">Verification engine</span></a>
+        <a href="#step-7"><span class="n">07</span><span class="t">Encumbrances &amp; disputes</span></a>
+        <a href="#step-8"><span class="n">08</span><span class="t">Marketplace &amp; portal</span></a>
+        <a href="#step-9"><span class="n">09</span><span class="t">Statutory workflows</span></a>
+      </div>
+
+      <article class="step" id="step-1">
+        <div class="step-head"><span class="step-num">01</span><h3>Know your data</h3></div>
+        <p class="plain">Before writing a line of the real app, we open the government <code>shapefiles</code> and figure out, honestly, what's actually inside them.</p>
+        <span class="field-label">Checks performed</span>
+        <ul class="plain">
+          <li>Feature count, and whether the <code>CRS</code> ("ruler") is correct — Kenyan cadastral data is commonly in UTM Arc 1960 zone 36S or 37S; the wrong one silently displaces every parcel.</li>
+          <li>Every column's name, type, how-often-empty, and value range.</li>
+          <li>Whether any column is actually a unique parcel ID.</li>
+          <li>Geometry validity: self-crossing outlines, unclosed rings, zero-area shapes.</li>
+          <li>Overlapping parcels — each overlap is a potential double-allocation, which is exactly the fraud class this platform exists to catch.</li>
+          <li>Whether anything resembling an owner's name exists at all, and how trustworthy it looks.</li>
+        </ul>
+        <span class="field-label">Built with</span>
+        <div class="pill-row"><span class="pill">QGIS (free, no code)</span><span class="pill">Node.js + shapefile (npm)</span></div>
+        <div class="exit-gate">
+          <span class="label">Exit gate</span>
+          <p>You can state, in one paragraph, exactly what these files contain and don't contain, compared to what the data model expects. Any bad surprise is far cheaper to find here than in Step 5.</p>
+        </div>
+      </article>
+
+      <article class="step" id="step-2">
+        <div class="step-head"><span class="step-num">02</span><h3>The canonical schema</h3></div>
+        <p class="plain">The actual database design — written down as real tables and rules before importing a single real parcel.</p>
+        <span class="field-label">Key pieces</span>
+        <ul class="plain">
+          <li>A <code>region</code> table, populated with exactly one row for the pilot city — but present from day one (Principle A, §02).</li>
+          <li>A <code>parcel</code> table: immutable ID, shape, region, land use, area, status, listing status, current owner, last-verified date.</li>
+          <li>A <code>parcel_version</code> table — every field change writes a new row; nothing is ever overwritten.</li>
+          <li>An <code>audit_log</code> table — append-only, hash-chained, written through one single function everything else must go through.</li>
+          <li>Empty "stub" tables for <code>dispute</code> and <code>encumbrance</code>, so the "can this parcel transact?" check (Step 7) has somewhere to look from day one.</li>
+          <li>A database-level rule that <code>listing_status</code> can only be set when <code>status = 'Verified'</code> — Principle B, made literal, not just checked in app code.</li>
+        </ul>
+        <span class="field-label">Built with</span>
+        <div class="pill-row"><span class="pill">Prisma schema + migrations</span><span class="pill">One raw SQL migration for the geometry column &amp; CHECK constraints</span></div>
+        <div class="exit-gate">
+          <span class="label">Exit gate</span>
+          <p>A brand-new, empty database can be built from these files alone, and it is impossible — even hand-writing raw SQL — to list an unverified parcel.</p>
+        </div>
+      </article>
+
+      <article class="step" id="step-3">
+        <div class="step-head"><span class="step-num">03</span><h3>The ingestion pipeline</h3></div>
+        <p class="plain">The import script — built to run safely again and again, because it will: every new ward, every corrected survey, every new county later.</p>
+        <span class="field-label">Rules</span>
+        <ul class="plain">
+          <li>Convert every shape to one consistent storage ruler (EPSG:4326), but always compute area using the correct local projected ruler — never in raw degrees.</li>
+          <li>Broken shapes get repaired, and every repair gets logged.</li>
+          <li>Column-name mapping lives in one small config file — never hardcoded.</li>
+          <li>Rows that fail validation go to a quarantine table with a reason — never silently dropped.</li>
+          <li>Every loaded parcel remembers its source file, file hash, load time, and loader version.</li>
+        </ul>
+        <span class="field-label">Built with</span>
+        <div class="pill-row"><span class="pill">Node.js + TypeScript</span><span class="pill">shapefile</span><span class="pill">proj4</span><span class="pill">@turf/turf</span><span class="pill">pg</span></div>
+        <div class="exit-gate">
+          <span class="label">Exit gate</span>
+          <p>Load, truncate, reload — identical result, every time. Loaded rows plus rejected rows equals the source file's feature count, exactly.</p>
+        </div>
+      </article>
+
+      <article class="step" id="step-4">
+        <div class="step-head"><span class="step-num">04</span><h3>Verify the load</h3></div>
+        <p class="plain">A second, independent check — ideally written by someone other than whoever wrote the loader, so it can't share the loader's blind spots.</p>
+        <span class="field-label">Checks</span>
+        <ul class="plain">
+          <li>Feature counts and total area reconcile against the source, within tolerance.</li>
+          <li>A random sample of parcels actually appears in the right place on a real map.</li>
+          <li>Every parcel ID really is unique.</li>
+          <li>The audit-log hash chain validates end to end.</li>
+        </ul>
+        <span class="field-label">Built with</span>
+        <div class="pill-row"><span class="pill">Jest</span><span class="pill">Standalone verification script</span></div>
+        <div class="exit-gate">
+          <span class="label">Exit gate</span>
+          <p>The report comes back clean, or every discrepancy has a written explanation next to it.</p>
+        </div>
+      </article>
+
+      <article class="step" id="step-5">
+        <div class="step-head"><span class="step-num">05</span><h3>The map</h3></div>
+        <p class="plain">The first thing anyone outside the dev team can actually look at: every parcel, real and searchable.</p>
+        <span class="field-label">Honest detail</span>
+        <p style="font-size:0.92rem;">At this point every parcel is <span class="badge badge--pending">Pending Verification</span>, so the map should be a wall of amber — and it should say so proudly, not apologize for it. That's the correct, honest state of the register this early. Owner-name search is deliberately missing: it's permission-gated, and there are no verified owners yet to search for.</p>
+        <span class="field-label">Built with</span>
+        <div class="pill-row"><span class="pill">Next.js</span><span class="pill">MapLibre GL JS</span><span class="pill">react-map-gl</span><span class="pill">Martin (vector tiles from PostGIS)</span></div>
+        <div class="exit-gate">
+          <span class="label">Exit gate</span>
+          <p>You can hand someone a link and they can find a specific parcel. This is the first artefact a government stakeholder can actually look at — which is why getting here fast, without cutting Steps 1–4, matters so much.</p>
+        </div>
+      </article>
+
+      <article class="step" id="step-6">
+        <div class="step-head"><span class="step-num">06</span><h3>The verification engine</h3></div>
+        <p class="plain">The actual trust machine the whole PRD is built around — the workflow no parcel can skip. This is why Steps 1–5 were kept deliberately thin.</p>
+        <span class="field-label">The one non-negotiable design point</span>
+        <div class="callout">
+          <p>Once a Verification Officer approves a parcel, the system doesn't flip a switch directly. It broadcasts an event — <em>"this parcel was Approved"</em> — and the marketplace and ownership code are only ever listening for that event; they have no other function that can change a parcel's status. That's what makes the gate physically impossible to bypass by accident, not just against policy.</p>
+        </div>
+        <span class="field-label">Also included</span>
+        <ul class="plain">
+          <li>Document vault: encrypted storage, hashing, malware scan, per-file access logging.</li>
+          <li>Risk tiering: value, first-time submitter, prior disputes, registry mismatch.</li>
+          <li>Officer assignment — system-assigned, never self-selected.</li>
+          <li>Second-reviewer gate above the risk threshold, blocking publish.</li>
+          <li>Duplicate-document-hash detection across different claimed owners — cheap to build, catches a real and common fraud pattern.</li>
+        </ul>
+        <span class="field-label">Built with</span>
+        <div class="pill-row"><span class="pill">NestJS modules</span><span class="pill">XState</span><span class="pill">S3-compatible storage</span><span class="pill">Redis + BullMQ (event/queue)</span></div>
+        <div class="exit-gate">
+          <span class="label">Exit gate</span>
+          <p>A parcel can move from Pending to Verified only by traversing the full workflow, with a complete audit chain — and a deliberate attempt to find a shortcut around it fails, every time it's tried.</p>
+        </div>
+      </article>
+
+      <article class="step" id="step-7">
+        <div class="step-head"><span class="step-num">07</span><h3>Encumbrances and disputes</h3></div>
+        <p class="plain">Before the marketplace exists, build the one function every other part of the system must ask: <em>"is this parcel actually free to be sold or transferred right now?"</em></p>
+        <span class="field-label">Why now, before the marketplace</span>
+        <p style="font-size:0.92rem;">So there is never a moment in the marketplace's history where it doesn't consult this check. Not "we'll add the check later" — the check exists before there's anything yet to check against.</p>
+        <span class="field-label">Built with</span>
+        <div class="pill-row"><span class="pill">One shared NestJS service function</span><span class="pill">charge / caution / restriction / inhibition tables</span><span class="pill">Dispute intake with auto-freeze</span></div>
+        <div class="exit-gate">
+          <span class="label">Exit gate</span>
+          <p>Placing any one of these blocks immediately and provably stops every listing and transfer path for that parcel.</p>
+        </div>
+      </article>
+
+      <article class="step" id="step-8">
+        <div class="step-head"><span class="step-num">08</span><h3>Marketplace and public portal</h3></div>
+        <p class="plain">The part regular people actually see and use: listings, public search, the "Verify a Parcel" tool.</p>
+        <p style="font-size:0.92rem;">Every one of these is only reachable for parcels that are already <span class="badge badge--verified">Verified</span> and unencumbered — because by this point, that's the only state the underlying code is even capable of producing.</p>
+        <span class="field-label">Built with</span>
+        <div class="pill-row"><span class="pill">Next.js routes/pages</span><span class="pill">Masked contact details</span><span class="pill">Offer &amp; counter-offer tracking</span></div>
+        <div class="exit-gate">
+          <span class="label">Exit gate</span>
+          <p>An independent penetration test, and a load test at ten times pilot-city volume, before this goes anywhere near the public.</p>
+        </div>
+      </article>
+
+      <article class="step" id="step-9">
+        <div class="step-head"><span class="step-num">09</span><h3>The statutory workflows</h3></div>
+        <p class="plain">The remaining legally-required processes: subdivision, ownership transfer, change of land use, succession (inheritance), easements.</p>
+        <span class="field-label">Sequencing</span>
+        <p style="font-size:0.92rem;">Build in the order the pilot city will actually use them — most likely ownership transfer first, subdivision second, and succession third, since fraudulent succession claims are also one of the most common sources of real land fraud and need the most legal care.</p>
+      </article>
+    </section>
+
+    <section id="legal">
+      <div class="section-head"><span class="clause">05</span><h2>The parallel legal track</h2></div>
+      <p class="prose">Steps 1–5 are pure software and can start today. But the PRD assumes a collaborating government registry, and budgets 6–8 weeks for legal setup. That clock has to start <strong>now</strong>, in parallel with Step 1 — not at Step 6 — because it's the longest-lead item in the whole programme and gates nothing technical until Step 6. That's exactly why it's the item most likely to be forgotten until it's suddenly the critical path. None of this depends on which programming language the team chose.</p>
+      <ul class="plain">
+        <li>Identify the pilot county's land registry and county physical planning office.</li>
+        <li>Open the <code>MoU</code> conversation — no technical integration work begins before a signed data-sharing agreement.</li>
+        <li>Establish where the shapefiles came from and under what licence they may be used — this determines whether anything can be published at all.</li>
+        <li>Data Protection Act 2019 compliance: register with the ODPC as a data controller, and produce a Data Protection Impact Assessment. Handling national ID numbers alongside land records is high-risk processing under the Act — a legal requirement, not a best practice.</li>
+        <li>Confirm data-residency/hosting-location constraints before picking a cloud region.</li>
+        <li>Agree — and repeat consistently to every stakeholder — the platform's position relative to the national system (e.g. Ardhisasa): an accelerator that reconciles against the official record, never a competing registry.</li>
+      </ul>
+    </section>
+
+    <section id="not-yet">
+      <div class="section-head"><span class="clause">06</span><h2>What not to build yet</h2></div>
+      <p class="prose">Named explicitly, because each of these will be tempting.</p>
+      <div class="not-yet">
+        <div class="item"><span class="x">✕</span><div><h4>Blockchain audit anchoring</h4><p>The hash chain (Step 2) already gives tamper-evidence. External anchoring adds outside attestation, which is worth nothing before there's anything worth attesting to.</p></div></div>
+        <div class="item"><span class="x">✕</span><div><h4>Payments and escrow</h4><p>Explicitly out of scope for Phase 1, and it drags in financial-services regulation the team isn't set up to handle yet.</p></div></div>
+        <div class="item"><span class="x">✕</span><div><h4>The offline field app</h4><p>A real future need, but it depends on the verification workflow (Step 6) existing first — building it earlier has nothing to plug into.</p></div></div>
+        <div class="item"><span class="x">✕</span><div><h4>21 separately-deployed services</h4><p>Same trap in JavaScript as in Python: module boundaries now (§03), deployment boundaries only once real volume demands them.</p></div></div>
+        <div class="item"><span class="x">✕</span><div><h4>Owner-name search</h4><p>Permission-gated, PII-heavy, and meaningless until there are actually verified owners to search for.</p></div></div>
+      </div>
+    </section>
+
+    <section id="next">
+      <div class="section-head"><span class="clause">07</span><h2>Immediate next action</h2></div>
+      <div class="next-box">
+        <h3>Connect the shapefile folder.</h3>
+        <p class="prose">Step 1 begins the moment the data is reachable. What it turns up — especially whether any ownership-adjacent field exists at all, and how clean the topology is — will sharpen every step that follows.</p>
+      </div>
+    </section>
+
+    <footer class="doc-footer">
+      Companion to the LandTrust Registry PRD v1.0, section "Build Route from Zero" — this version swaps every Python/GeoDjango recommendation for its Node.js/React/Next.js equivalent and defines every GIS and legal term in plain English on first use.
+    </footer>
+
+  </main>
+</div>
+
+<script>
+  (function(){
+    var links = Array.prototype.slice.call(document.querySelectorAll('.railnav a'));
+    var sections = links.map(function(a){ return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+    if(!('IntersectionObserver' in window) || !sections.length) return;
+    var byId = {};
+    links.forEach(function(a){ byId[a.getAttribute('href').slice(1)] = a; });
+    var observer = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        var link = byId[entry.target.id];
+        if(!link) return;
+        if(entry.isIntersecting){
+          links.forEach(function(l){ l.classList.remove('active'); });
+          link.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
+    sections.forEach(function(s){ observer.observe(s); });
+  })();
+</script>

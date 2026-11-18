@@ -1,0 +1,28 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: landtrust
+      POSTGRES_PASSWORD: landtrust
+      POSTGRES_DB: landtrust
+    ports:
+      - "5434:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  tiles:
+    image: ghcr.io/maplibre/martin
+    restart: unless-stopped
+    # No tile cache: a parcel's colour must change on the map as soon as its
+    # verification is published, not whenever a cached tile happens to expire.
+    command: ["--cache-size", "0"]
+    environment:
+      DATABASE_URL: postgresql://landtrust:landtrust@db:5432/landtrust
+    ports:
+      - "3010:3000"
+    depends_on:
+      - db
+
+volumes:
+  db_data:
